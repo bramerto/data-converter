@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Data;
 
 namespace dataconverter
@@ -11,32 +12,53 @@ namespace dataconverter
             Microsoft.Office.Interop.Excel.Application oXL;
             Microsoft.Office.Interop.Excel._Workbook oWB;
             Microsoft.Office.Interop.Excel._Worksheet oSheet;
-            Microsoft.Office.Interop.Excel.Range oRng;
 
             oXL = new Microsoft.Office.Interop.Excel.Application();
             oXL.Visible = true;
-            oWB = (Microsoft.Office.Interop.Excel._Workbook)(oXL.Workbooks.Add(""));
-            oSheet = (Microsoft.Office.Interop.Excel._Worksheet)oWB.ActiveSheet;
+            oWB = oXL.Workbooks.Add("");
 
             object misvalue = System.Reflection.Missing.Value;
-            DataTable t = sql.PullData("AuthAssignment");
-            DataRow firstrow = t.Rows[0];
+            List<DataTable> dtList = new List<DataTable>();
 
-            int columnCounter = 0;
-            foreach (System.Data.DataColumn col in firstrow.Table.Columns) {
-                oSheet.Cells[1, columnCounter] = col.ToString();
-                Console.Write(col + " | ");
-            }
-            Console.WriteLine(" ");
-
-            foreach(System.Data.DataRow row in t.Rows) {
-                foreach(Object item in row.ItemArray) {
-                    if (item != null || (string)item != string.Empty) {
-                        Console.Write(item + " | ");
-                    }
+            foreach (string table in getTableList()) {
+                DataTable data = sql.PullData(table);
+                if (data.Rows.Count > 0 && data != null) {
+                    dtList.Add(data);
                 }
-                Console.WriteLine(" ");
             }
+
+            foreach (DataTable t in dtList) {
+                DataRow firstrow = t.Rows[0];
+                oSheet = (Microsoft.Office.Interop.Excel._Worksheet)oWB.Sheets.Add();
+
+                int headingCount = 1;
+                int itemCount = 1;
+                int rowCount = 2;
+
+                foreach (System.Data.DataColumn col in firstrow.Table.Columns) {
+                    oSheet.Cells[1, headingCount] = col.ToString();
+                    headingCount++;
+                }
+
+                foreach (System.Data.DataRow row in t.Rows) {
+                    foreach (Object item in row.ItemArray) {
+                        if (item != null || (string) item != string.Empty) {
+                            oSheet.Cells[rowCount, itemCount] = item.ToString();
+                            itemCount++;
+                        }
+                    }
+
+                    itemCount = 1;
+                    rowCount++;
+                }
+            }
+        }
+
+        static string[] getTableList ()
+        {
+            return new string[] { //insert own tables here
+                
+            };
         }
     }
 }
