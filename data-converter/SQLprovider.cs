@@ -28,15 +28,40 @@ namespace dataconverter
             try {
                 conn.Open();
                 Console.WriteLine("Connection open");
-                // create data adapter
+
                 MySqlDataAdapter da = new MySqlDataAdapter(cmd);
-                // this will query your database and return the result to your datatable
                 da.Fill(dataTable);
-                Console.WriteLine("Query executed");
+                Console.WriteLine("Query PullData executed");
+
                 conn.Close();
-                Console.WriteLine("Connection closed");
                 da.Dispose();
-                
+                Console.WriteLine("Connection closed");
+
+            } catch (Exception e) {
+                Console.WriteLine(e.ToString());
+            }
+
+            return dataTable;
+        }
+
+        public DataTable getTables ()
+        {
+            dataTable = new DataTable();
+            string query = "SELECT table_name FROM information_schema.tables WHERE table_schema='" + conn_string.Database + "';";
+            MySqlConnection conn = new MySqlConnection(conn_string.ToString());
+            MySqlCommand cmd = new MySqlCommand(query, conn);
+
+            try {
+                conn.Open();
+                Console.WriteLine("Connection open");
+
+                MySqlDataAdapter da = new MySqlDataAdapter(cmd);
+                da.Fill(dataTable);
+                Console.WriteLine("Query getTables executed");
+
+                conn.Close();
+                da.Dispose();
+                Console.WriteLine("Connection closed");
 
             } catch (Exception e) {
                 Console.WriteLine(e.ToString());
